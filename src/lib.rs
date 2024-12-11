@@ -41,18 +41,10 @@ pub fn dkms_install(kernel_old: &str, kernel_new: &str) -> Result<()> {
     println!("Running DKMS installation...");
 
     let dkms_versao = get_nvidia_version()?;
-    let nvidia = format!("nvidia/{}", dkms_versao);
-    let kernel = format!("{}-ClaudioFSR", kernel_new);
 
-    run_command(
-        "dkms",
-        &["install", "--force", "--no-depmod", &nvidia, "-k", &kernel],
-    )?;
+    dkms_build(kernel_new, &dkms_versao)?;
 
-    println!("Removing old DKMS files...");
-    println!("kernel_old: {}", kernel_old);
-
-    remove_dkms_files(kernel_old, &dkms_versao)?;
+    dkms_remove(kernel_old, &dkms_versao)?;
 
     println!("DKMS installation completed successfully.\n");
     Ok(())
@@ -71,18 +63,32 @@ fn get_nvidia_version() -> Result<String> {
     // nvidia/550.135, 6.11.10-2-MANJARO, x86_64: installed
     // nvidia/550.135, 6.12.4-ClaudioFSR, x86_64: installed
 
-    let dkms_versao = dkms_output
+    let nvidia_version = dkms_output
         .lines()
         .find(|&line| line.starts_with("nvidia"))
         .and_then(|line| line.split(['/', ',']).nth(1))
-        .ok_or(anyhow!("Failed to extract DKMS version."))?;
+        .ok_or(anyhow!("Failed to extract nvidia version."))?;
 
-    println!("DKMS version: {dkms_versao}");
+    println!("DKMS nvidia version: {nvidia_version}");
 
-    Ok(dkms_versao.to_string())
+    Ok(nvidia_version.to_string())
 }
 
-fn remove_dkms_files(kernel_old: &str, dkms_versao: &str) -> Result<()> {
+fn dkms_build(kernel_new: &str, dkms_versao: &str) -> Result<()> {
+    let nvidia = format!("nvidia/{}", dkms_versao);
+    let kernel = format!("{}-ClaudioFSR", kernel_new);
+    let args = ["install", "--force", "--no-depmod", &nvidia, "-k", &kernel];
+
+    run_command("dkms", &args)?;
+
+    println!("DKMS build for {} completed successfully.", kernel_new);
+    Ok(())
+}
+
+fn dkms_remove(kernel_old: &str, dkms_versao: &str) -> Result<()> {
+    println!("Removing old DKMS files...");
+    println!("kernel_old: {}", kernel_old);
+
     let dkms_file = format!(
         "/var/lib/dkms/nvidia/kernel-{}-ClaudioFSR-x86_64",
         kernel_old
