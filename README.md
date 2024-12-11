@@ -1,9 +1,10 @@
 # kernel_updater
 
-Manjaro Linux kernel updater
+### Manjaro Linux kernel updater
 
-dkms-install
-kernel-compile
+* dkms-install
+
+* kernel-compile
 
 See:
 
