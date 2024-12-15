@@ -19,6 +19,7 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
     run_command("wget", &[&link])?;
     run_command("tar", &["-Jxvf", &format!("linux-{kernel_new}.tar.xz")])?;
 
+    std::env::set_current_dir(KERNEL_SRC_BASE)?;
     fs::create_dir_all(&kernel_src_dir)?;
     std::env::set_current_dir(&kernel_src_dir)?;
 
