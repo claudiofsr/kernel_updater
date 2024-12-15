@@ -1,6 +1,6 @@
 // lib.rs
 use anyhow::{anyhow, Context, Result};
-use std::{fs, process::Command};
+use std::{env, fs, process::Command};
 
 mod args;
 pub use args::{Arguments, Commands};
@@ -16,15 +16,15 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
 
     println!("Compiling kernel {kernel_new} with {cores} cores...");
 
+    env::set_current_dir(KERNEL_SRC_BASE)?;
+
     run_command("wget", &[&link])?;
     run_command("tar", &["-Jxvf", &format!("linux-{kernel_new}.tar.xz")])?;
 
-    std::env::set_current_dir(KERNEL_SRC_BASE)?;
-    fs::create_dir_all(&kernel_src_dir)?;
-    std::env::set_current_dir(&kernel_src_dir)?;
+    env::set_current_dir(&kernel_src_dir)?;
 
     // Build the kernel
-    run_command("cp", &[&config_file, ".config"])?;
+    run_command("cp", &["-f", &config_file, ".config"])?;
     run_command("make", &["-j", &cores])?;
     run_command("make", &["modules_install"])?;
     run_command(
@@ -32,7 +32,7 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
         &["-fv", "arch/x86/boot/bzImage", "/boot/vmlinuz-6.12"],
     )?;
 
-    std::env::set_current_dir(KERNEL_SRC_BASE)?;
+    env::set_current_dir(KERNEL_SRC_BASE)?;
 
     println!("Kernel compilation completed successfully.\n");
     Ok(())
