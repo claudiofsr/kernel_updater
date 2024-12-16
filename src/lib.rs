@@ -32,8 +32,6 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
         &["-fv", "arch/x86/boot/bzImage", "/boot/vmlinuz-6.12"],
     )?;
 
-    env::set_current_dir(KERNEL_SRC_BASE)?;
-
     println!("Kernel compilation completed successfully.\n");
     Ok(())
 }
