@@ -39,6 +39,8 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
 pub fn dkms_install(kernel_old: &str, kernel_new: &str) -> Result<()> {
     println!("Running DKMS installation...");
 
+    let kernel_src_dir = format!("{KERNEL_SRC_BASE}/linux-{kernel_new}");
+    env::set_current_dir(&kernel_src_dir)?;
     run_command("make", &["modules_install"])?;
 
     let dkms_versao = get_nvidia_version()?;
