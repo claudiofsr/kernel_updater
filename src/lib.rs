@@ -39,6 +39,8 @@ pub fn kernel_compile(kernel_new: &str) -> Result<()> {
 pub fn dkms_install(kernel_old: &str, kernel_new: &str) -> Result<()> {
     println!("Running DKMS installation...");
 
+    run_command("make", &["modules_install"])?;
+
     let dkms_versao = get_nvidia_version()?;
 
     dkms_build(kernel_new, &dkms_versao)?;
